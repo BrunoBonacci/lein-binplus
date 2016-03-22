@@ -1,4 +1,4 @@
-(defproject lein-binplus "0.4.0"
+(defproject lein-binplus "0.4.1"
   :description "A leiningen plugin for generating standalone console
   executables for your project."
   :url "https://github.com/BrunoBonacci/lein-binplus"
