@@ -17,6 +17,10 @@ neglected and decided to push my own plugin.
 It is compatible with the original and it is a *drop-in replacement* for it,
 you just need to update the dependency.
 
+## Latest version
+
+[![Clojars Project](https://img.shields.io/clojars/v/lein-binplus.svg)](https://clojars.org/lein-binplus)
+
 ## Usage
 
 This is a leiningen plugin. If you're using lein 1, run `lein plugin
