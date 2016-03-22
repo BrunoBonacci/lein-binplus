@@ -1,4 +1,4 @@
-# lein-bin
+# lein-binplus
 
 A Leiningen plugin for producing standalone console executables that
 work on OS X, Linux, and Windows.
@@ -6,12 +6,40 @@ work on OS X, Linux, and Windows.
 It basically just takes your uberjar and stuffs it in another file
 with some fancy magical execution stuff.
 
+**NOTE: This is a fork of
+[Raynes/lein-bin](https://github.com/Raynes/lein-bin)
+with the addition of several bug-fixes and improvements.**
+
+I've initially send a [pull request](https://github.com/Raynes/lein-bin/pull/26)
+but after few months which I've been waiting, I felt that the project was
+neglected and decided to push my own plugin.
+
+It is compatible with the original and it is a *drop-in replacement* for it,
+you just need to update the dependency.
+
 ## Usage
 
 This is a leiningen plugin. If you're using lein 1, run `lein plugin
-install lein-bin <current-version>` to install it.  If you're using
+install lein-binplus <current-version>` to install it.  If you're using
 lein 2, add the plugin to your default profile in
 `~/.lein/profiles.clj`.
+
+To install it in your `profile.clj` just add the dependency like:
+
+``` clojure
+{:user
+ {:plugins
+  [[lein-binplus "0.4.0"]]}}
+
+```
+
+To install it in a single project add it in your `project.clj` as follow:
+
+``` clojure
+  :profiles {:uberjar {:aot :all}
+             :dev {:plugins [[lein-binplus "0.4.0"]]}}
+
+```
 
 Your project needs to have a `:main` field specifying the namespace
 that contains your `-main` function.  If you have that, just run `lein
@@ -38,8 +66,7 @@ You can also supply a `:bin` key like so:
 
 ## License
 
-Copyright (C) 2012 Anthony Grimes, Justin Balthrop
-
-Copyright (C) 2013 Jason Whitlark
+The original plugin Copyright (C) 2012 Anthony Grimes, Justin Balthrop, Jason Whitlark
+This enhanced version Copyright (C) 2016 Bruno Bonacci
 
 Distributed under the Eclipse Public License, the same as Clojure.
