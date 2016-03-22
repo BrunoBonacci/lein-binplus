@@ -67,6 +67,7 @@ You can also supply a `:bin` key like so:
 ## License
 
 The original plugin Copyright (C) 2012 Anthony Grimes, Justin Balthrop, Jason Whitlark
+
 This enhanced version Copyright (C) 2016 Bruno Bonacci
 
 Distributed under the Eclipse Public License, the same as Clojure.
