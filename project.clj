@@ -9,7 +9,7 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
 
-  :dependencies [[me.raynes/fs "1.4.0"]]
+  :dependencies [[me.raynes/fs "1.4.6"]]
   :eval-in-leiningen true
 
   :deploy-repositories [["releases" :clojars]
