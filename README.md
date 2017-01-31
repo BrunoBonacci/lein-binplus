@@ -11,8 +11,7 @@ with some fancy magical execution stuff.
 with the addition of several bug-fixes and improvements.**
 
 Sadly, [@Raynes passed away last December (2016)](https://cemerick.com/2016/12/07/rip-anthony-grimes/)
-therefore I decided to fork the project and push additional
-bug-fixes and enhancements in this copy.
+therefore I decided to fork the project and carry on the development in my own copy.
 
 It is compatible with the original and it is a *drop-in replacement* for it,
 you just need to update the dependency.
