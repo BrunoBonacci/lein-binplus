@@ -10,9 +10,9 @@ with some fancy magical execution stuff.
 [Raynes/lein-bin](https://github.com/Raynes/lein-bin)
 with the addition of several bug-fixes and improvements.**
 
-I've initially send a [pull request](https://github.com/Raynes/lein-bin/pull/26)
-but after few months which I've been waiting, I felt that the project was
-neglected and decided to push my own plugin.
+Sadly, [@Raynes passed away last December (2016)](https://cemerick.com/2016/12/07/rip-anthony-grimes/)
+therefore I decided to fork the project and push additional
+bug-fixes and enhancements in this copy.
 
 It is compatible with the original and it is a *drop-in replacement* for it,
 you just need to update the dependency.
