@@ -1,6 +1,6 @@
 (ns leiningen.bin
   "Create a standalone executable for your project."
-  (:require [clojure.string :refer [join]]
+  (:require [clojure.string :as string :refer [join]]
             [leiningen.jar :refer [get-jar-filename]]
             [leiningen.uberjar :refer [uberjar]]
             [me.raynes.fs :as fs]
@@ -36,8 +36,13 @@
           (join " " flags) main
           (join (sanitize-jvm-opts-for-win flags)) main))
 
-(defn write-custom-preamble [out preamble]
-  (.write out (.getBytes preamble)))
+(defn fill-template [template flags main]
+  (string/replace (string/replace (string/replace template #"([^\\])FLAGS" (str "$1" (join " " flags)))
+                                  #"([^\\])MAIN" (str "$1" main))
+                  #"\\(MAIN|FLAGS)" "$1"))
+
+(defn write-custom-preamble! [out preamble flags main]
+  (.write out (.getBytes (fill-template preamble flags main))))
 
 (defn write-jar-preamble! [out flags]
   (.write out (.getBytes (jar-preamble flags))))
@@ -75,7 +80,7 @@
         (cond
           ;; custom preamble
           (get-in project [:bin :custom-preamble])
-          (write-custom-preamble bin (get-in project [:bin :custom-preamble]))
+          (write-custom-preamble! bin (get-in project [:bin :custom-preamble]) opts (:main project))
           ;; bootclasspath
           (get-in project [:bin :bootclasspath])
           (write-boot-preamble! bin opts (:main project))
