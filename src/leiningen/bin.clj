@@ -36,6 +36,9 @@
           (join " " flags) main
           (join (sanitize-jvm-opts-for-win flags)) main))
 
+(defn write-custom-preamble [out preamble]
+  (.write out (.getBytes preamble)))
+
 (defn write-jar-preamble! [out flags]
   (.write out (.getBytes (jar-preamble flags))))
 
@@ -52,8 +55,8 @@
 (defn bin
   "Create a standalone console executable for your project.
 
-Add :main to your project.clj to specify the namespace that contains your
--main function."
+  Add :main to your project.clj to specify the namespace that contains your
+  -main function."
   [project]
   (if (:main project)
     (let [target  (fs/file (:target-path project))
@@ -69,8 +72,15 @@ Add :main to your project.clj to specify the namespace that contains your
       (println "Creating standalone executable:" (str binfile))
       (io/make-parents binfile)
       (with-open [bin (FileOutputStream. binfile)]
-        (if (get-in project [:bin :bootclasspath])
+        (cond
+          ;; custom preamble
+          (get-in project [:bin :custom-preamble])
+          (write-custom-preamble bin (get-in project [:bin :custom-preamble]))
+          ;; bootclasspath
+          (get-in project [:bin :bootclasspath])
           (write-boot-preamble! bin opts (:main project))
+          ;; normal jar
+          :else
           (write-jar-preamble! bin opts))
         (io/copy (fs/file jarfile) bin))
       (fs/chmod "+x" binfile)
