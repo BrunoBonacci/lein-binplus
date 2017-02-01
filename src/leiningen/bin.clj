@@ -1,93 +1,122 @@
 (ns leiningen.bin
   "Create a standalone executable for your project."
-  (:require [clojure.string :as string :refer [join]]
-            [leiningen.jar :refer [get-jar-filename]]
+  (:require [clojure.java.io :as io]
+            [clostache.parser :refer [render]]
             [leiningen.uberjar :refer [uberjar]]
             [me.raynes.fs :as fs]
-            [clojure.java.io :as io])
-  (:import java.io.FileOutputStream))
+            [clojure.string :as str]))
 
-(defn- jvm-options [{:keys [name version]} jvm-opts]
-  (let [is-server (some #(= %1 "-server") jvm-opts)
-         client-opt (if is-server "-server" "-client")]
-    (distinct (conj jvm-opts client-opt (format "-D%s.version=%s" name version)))))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                                                                            ;;
+;;                      ---==| T E M P L A T E S |==----                      ;;
+;;                                                                            ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(def BOOTCLASSPATH-TEMPLATE
+  ":;exec java {{jvm-opts}} -D{{project-name}}.version={{version}} -Xbootclasspath/a:$0 {{main}} \"$@\"\n@echo off\r\njava {{win-jvm-opts}} -D{{project-name}}.version={{version}} -Xbootclasspath/a:%1 {{main}} \"%~f0\" %*\r\ngoto :eof\r\n")
+
+(def NORMAL-TEMPLATE
+  ":;exec java {{&jvm-opts}} -D{{project-name}}.version={{version}} -jar $0 \"$@\"\n@echo off\r\njava {{&win-jvm-opts}} -D{{project-name}}.version={{version}} -jar %1 \"%~f0\" %*\r\ngoto :eof\r\n")
+
+(def LEIN-JVM-OPTS ["-XX:+TieredCompilation" "-XX:TieredStopAtLevel=1" "-XX:-OmitStackTraceInFastThrow"])
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                                                                            ;;
+;;                       ---==| P R E A M B L E |==----                       ;;
+;;                                                                            ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(defn preamble-template
+  [{:keys [bootclasspath custom-preamble] :as options}]
+  (cond
+    custom-preamble (str custom-preamble "\r\n")
+    bootclasspath   BOOTCLASSPATH-TEMPLATE
+    :else           NORMAL-TEMPLATE))
+
+
+(defn render-preamble
+  [template {:keys [main project-name version jvm-opts] :as opts}]
+  (-> (render template opts)
+      (str/replace #"\\\$" "\\$")))
+
+
+(defn jvm-opts [project]
+  (str/join " "
+            (or (get-in project [:bin :jvm-opts])
+               (if (= (:jvm-opts project) LEIN-JVM-OPTS)
+                 ["-server -Dfile.encoding=UTF-8"]
+                 (:jvm-opts project)))))
 
 (defn- sanitize-jvm-opts-for-win
   "turns linux style vars \"$FOO\" into win style \"%FOO\"."
   [opts]
-  (map
-   (fn [^String o]
-     (when o
-       (.replaceAll o "\\$([a-zA-Z0-9_]+)" "%$1%")))
-   opts))
+  (str/replace opts #"\$([a-zA-Z0-9_]+)" "%$1%"))
 
 
-(defn jar-preamble [flags]
-  (format (str ":;exec java %s -jar $0 \"$@\"\n"
-               "@echo off\r\njava %s -jar %%1 \"%%~f0\" %%*\r\ngoto :eof\r\n")
-          (join " " flags)
-          (join " " (sanitize-jvm-opts-for-win flags))))
+(defn options [project]
+  {:project-name    (:name project)
+   :version         (:version project)
 
-(defn boot-preamble [flags main]
-  (format (str ":;exec java %s -Xbootclasspath/a:$0 %s \"$@\"\n"
-               "@echo off\r\njava %s -Xbootclasspath/a:%%1 %s "
-               "\"%%~f0\" %%*\r\ngoto :eof\r\n")
-          (join " " flags) main
-          (join (sanitize-jvm-opts-for-win flags)) main))
+   :main            (:main project)
+   :bootclasspath   (get-in project [:bin :bootclasspath] false)
+   :jvm-opts        (jvm-opts project)
+   :win-jvm-opts    (sanitize-jvm-opts-for-win (jvm-opts project))
+   :custom-preamble (get-in project [:bin :custom-preamble])
 
-(defn fill-template [template flags main]
-  (string/replace (string/replace (string/replace template #"([^\\])FLAGS" (str "$1" (join " " flags)))
-                                  #"([^\\])MAIN" (str "$1" main))
-                  #"\\(MAIN|FLAGS)" "$1"))
+   :binfile         (fs/file (fs/file (:target-path project))
+                             (or (get-in project [:bin :name])
+                                (str (:name project) "-" (:version project))))
+   :uberjar         (uberjar project)})
 
-(defn write-custom-preamble! [out preamble flags main]
-  (.write out (.getBytes (fill-template preamble flags main))))
 
-(defn write-jar-preamble! [out flags]
-  (.write out (.getBytes (jar-preamble flags))))
+(defn preamble
+  [opts]
+  (-> (preamble-template opts)
+      (render-preamble opts)))
 
-(defn write-boot-preamble! [out flags main]
-  (.write out (.getBytes (boot-preamble flags main))))
 
-(defn ^:private copy-bin [project binfile]
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                                                                            ;;
+;;                         ---==| B I N A R Y |==----                         ;;
+;;                                                                            ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(defn- write-preamble [out ^String preamble]
+  (.write out (.getBytes preamble)))
+
+
+(defn writing-bin [{:keys [binfile uberjar]} preamble]
+  (println "Creating standalone executable:" (str binfile))
+  (io/make-parents binfile)
+  (with-open [bin (io/output-stream binfile)]
+    (write-preamble bin preamble)
+    (io/copy (fs/file uberjar) bin))
+  (fs/chmod "+x" binfile))
+
+
+(defn- copy-bin [project binfile]
   (when-let [bin-path (get-in project [:bin :bin-path])]
     (let [bin-path (fs/expand-home bin-path)
           new-binfile (fs/file bin-path (fs/base-name binfile))]
       (println "Copying binary to" bin-path)
       (fs/chmod "+x" (fs/copy+ binfile new-binfile)))))
 
+
+
 (defn bin
   "Create a standalone console executable for your project.
 
   Add :main to your project.clj to specify the namespace that contains your
   -main function."
-  [project]
-  (if (:main project)
-    (let [target  (fs/file (:target-path project))
-          binfile (fs/file target
-                           (or (get-in project [:bin :name])
-                              (str (:name project) "-" (:version project))))
-
-          jvm-opts     (:jvm-opts project)
-          bin-jvm-opts (get-in project [:bin :jvm-opts])
-          opts         (jvm-options project (or bin-jvm-opts jvm-opts []))
-
-          jarfile (uberjar project)]
-      (println "Creating standalone executable:" (str binfile))
-      (io/make-parents binfile)
-      (with-open [bin (FileOutputStream. binfile)]
-        (cond
-          ;; custom preamble
-          (get-in project [:bin :custom-preamble])
-          (write-custom-preamble! bin (get-in project [:bin :custom-preamble]) opts (:main project))
-          ;; bootclasspath
-          (get-in project [:bin :bootclasspath])
-          (write-boot-preamble! bin opts (:main project))
-          ;; normal jar
-          :else
-          (write-jar-preamble! bin opts))
-        (io/copy (fs/file jarfile) bin))
-      (fs/chmod "+x" binfile)
-      (copy-bin project binfile))
-    (println "Cannot create bin without :main namespace in project.clj")))
+  [{:keys [main] :as project}]
+  (if-not main
+    (println "Cannot create bin without :main namespace in project.clj")
+    (let [opts (options project)]
+      (writing-bin opts (preamble opts))
+      (copy-bin project (:binfile opts)))))
