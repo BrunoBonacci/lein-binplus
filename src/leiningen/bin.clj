@@ -67,11 +67,7 @@
    :jvm-opts        (jvm-opts project)
    :win-jvm-opts    (sanitize-jvm-opts-for-win (jvm-opts project))
    :custom-preamble (get-in project [:bin :custom-preamble])
-
-   :binfile         (fs/file (fs/file (:target-path project))
-                             (or (get-in project [:bin :name])
-                                (str (:name project) "-" (:version project))))
-   :uberjar         (uberjar project)})
+   })
 
 
 (defn preamble
@@ -91,7 +87,7 @@
   (.write out (.getBytes preamble)))
 
 
-(defn writing-bin [{:keys [binfile uberjar]} preamble]
+(defn writing-bin [binfile uberjar preamble]
   (println "Creating standalone executable:" (str binfile))
   (io/make-parents binfile)
   (with-open [bin (io/output-stream binfile)]
@@ -117,6 +113,10 @@
   [{:keys [main] :as project}]
   (if-not main
     (println "Cannot create bin without :main namespace in project.clj")
-    (let [opts (options project)]
-      (writing-bin opts (preamble opts))
+    (let [opts    (options project)
+          binfile (fs/file (fs/file (:target-path project))
+                           (or (get-in project [:bin :name])
+                              (str (:name project) "-" (:version project))))
+          uberjar (uberjar project)]
+      (writing-bin binfile uberjar (preamble opts))
       (copy-bin project (:binfile opts)))))
