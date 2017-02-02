@@ -32,7 +32,7 @@ To install it in your `profile.clj` just add the dependency like:
 ``` clojure
 {:user
  {:plugins
-  [[lein-binplus "0.6.0"]]}}
+  [[lein-binplus "0.6.1"]]}}
 
 ```
 
@@ -40,7 +40,7 @@ To install it in a single project add it in your `project.clj` as follow:
 
 ``` clojure
   :profiles {:uberjar {:aot :all}
-             :dev {:plugins [[lein-binplus "0.6.0"]]}}
+             :dev {:plugins [[lein-binplus "0.6.1"]]}}
 
 ```
 
@@ -82,18 +82,18 @@ can add a `:custom-preamble` string in your `:bin` section of your `project.clj`
 
         ;; specify a custom preamble
         :bin {:name "runme"
-              :custom-preamble "#!/bin/sh\nexec java {{jvm_opts}} -jar $0 \"$@\"\n"}
+              :custom-preamble "#!/bin/sh\nexec java {{jvm-opts}} -jar $0 \"$@\"\n"}
 
-The custom preamble contains a placeholder `{{jvm_opts}}` which will be replaced
-at creation time with the `:jvm_opts` specified in your project.
+The custom preamble contains a placeholder `{{jvm-opts}}` which will be replaced
+at creation time with the `:jvm-opts` specified in your project.
 
 Here a list of possible substitutions:
 
   - `{{project-name}}` - the name specified in your `project.clj`
   - `{{version}}` - the version specified in your `project.clj`
   - `{{main}}` - the main namespace as of `:main` in your `project.clj`
-  - `{{jvm-opts}}` - the `:jvm_opts` specified in your `:bin` section,
-     if present, of the `:jvm_opts` or your `project.clj`.
+  - `{{jvm-opts}}` - the `:jvm-opts` specified in your `:bin` section,
+     if present, of the `:jvm-opts` or your `project.clj`.
      The default options are: `["-server" "-Dfile.encoding=UTF-8"]`
      This might contains environment variables in the form of:
      `$VAR1` like `$HOME`.

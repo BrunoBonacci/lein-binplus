@@ -119,4 +119,4 @@
                               (str (:name project) "-" (:version project))))
           uberjar (uberjar project)]
       (writing-bin binfile uberjar (preamble opts))
-      (copy-bin project (:binfile opts)))))
+      (copy-bin project binfile))))
