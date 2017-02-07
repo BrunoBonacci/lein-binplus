@@ -82,7 +82,7 @@ can add a `:custom-preamble` string in your `:bin` section of your `project.clj`
 
         ;; specify a custom preamble
         :bin {:name "runme"
-              :custom-preamble "#!/bin/sh\nexec java {{jvm-opts}} -jar $0 \"$@\"\n"}
+              :custom-preamble "#!/bin/sh\nexec java {{{jvm-opts}}} -jar $0 \"$@\"\n"}
 
 The custom preamble contains a placeholder `{{jvm-opts}}` which will be replaced
 at creation time with the `:jvm-opts` specified in your project.
@@ -100,6 +100,17 @@ Here a list of possible substitutions:
   - `{{win-jvm-opts}}` - is a Windows compatible version of `{{jvm-opts}}`.
      This mainly contains environment variable in the Windows format.
      For example `$HOME` becomes `%HOME%`.
+
+**Note:** `lein-binplus` uses a templating library
+called [Clostache](https://github.com/fhd/clostache) to render the
+templates. Clostache automatically escapes characters such as: `< > & %`.
+If you don't want this behaviour use the triple braces in place of the
+double ones.
+
+```
+  Escaped: {{jvm-opts}}
+Unescaped: {{{jvm-opts}}}
+```
 
 ## License
 
