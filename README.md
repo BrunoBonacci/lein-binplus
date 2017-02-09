@@ -82,20 +82,20 @@ can add a `:custom-preamble` string in your `:bin` section of your `project.clj`
         :bin {:name "runme"
               :custom-preamble "#!/bin/sh\nexec java {{{jvm-opts}}} -jar $0 \"$@\"\n"}
 
-The custom preamble contains a placeholder `{{jvm-opts}}` which will be replaced
+The custom preamble contains a placeholder `{{{jvm-opts}}}` which will be replaced
 at creation time with the `:jvm-opts` specified in your project.
 
 Here a list of possible substitutions:
 
-  - `{{project-name}}` - the name specified in your `project.clj`
-  - `{{version}}` - the version specified in your `project.clj`
-  - `{{main}}` - the main namespace as of `:main` in your `project.clj`
-  - `{{jvm-opts}}` - the `:jvm-opts` specified in your `:bin` section,
-     if present, of the `:jvm-opts` or your `project.clj`.
+  - `{{{project-name}}}` - the name specified in your `project.clj`
+  - `{{{version}}}` - the version specified in your `project.clj`
+  - `{{{main}}}` - the main namespace as of `:main` in your `project.clj`
+  - `{{{jvm-opts}}}` - the `:jvm-opts` specified in your `:bin` section,
+     if present, or the `:jvm-opts` of your `project.clj`.
      The default options are: `["-server" "-Dfile.encoding=UTF-8"]`
      This might contains environment variables in the form of:
      `$VAR1` like `$HOME`.
-  - `{{win-jvm-opts}}` - is a Windows compatible version of `{{jvm-opts}}`.
+  - `{{{win-jvm-opts}}}` - is a Windows compatible version of `{{{jvm-opts}}}`.
      This mainly contains environment variable in the Windows format.
      For example `$HOME` becomes `%HOME%`.
 
