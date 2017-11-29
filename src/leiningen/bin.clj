@@ -15,10 +15,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def BOOTCLASSPATH-TEMPLATE
-  ":;exec java {{{jvm-opts}}} -D{{{project-name}}}.version={{{version}}} -Xbootclasspath/a:$0 {{{main}}} \"$@\"\n@echo off\r\njava {{{win-jvm-opts}}} -D{{{project-name}}}.version={{{version}}} -Xbootclasspath/a:%1 {{{main}}} \"%~f0\" %*\r\ngoto :eof\r\n")
+  ":;exec java {{{jvm-opts}}} -D{{{project-name}}}.version={{{version}}} -Xbootclasspath/a:$0 {{{main}}} \"$@\"\n@echo off\r\njava {{{win-jvm-opts}}} -D{{{project-name}}}.version={{{version}}} -Xbootclasspath/a:\"%~f0\" {{{main}}} %*\r\ngoto :eof\r\n")
 
 (def NORMAL-TEMPLATE
-  ":;exec java {{{jvm-opts}}} -D{{{project-name}}}.version={{{version}}} -jar $0 \"$@\"\n@echo off\r\njava {{{win-jvm-opts}}} -D{{{project-name}}}.version={{{version}}} -jar %1 \"%~f0\" %*\r\ngoto :eof\r\n")
+  ":;exec java {{{jvm-opts}}} -D{{{project-name}}}.version={{{version}}} -jar $0 \"$@\"\n@echo off\r\njava {{{win-jvm-opts}}} -D{{{project-name}}}.version={{{version}}} -jar \"%~f0\" %*\r\ngoto :eof\r\n")
 
 (def LEIN-JVM-OPTS ["-XX:+TieredCompilation" "-XX:TieredStopAtLevel=1" "-XX:-OmitStackTraceInFastThrow"])
 
