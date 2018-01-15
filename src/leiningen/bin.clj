@@ -4,7 +4,8 @@
             [clostache.parser :refer [render]]
             [leiningen.uberjar :refer [uberjar]]
             [me.raynes.fs :as fs]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [clj-zip-meta.core :refer [repair-zip-with-preamble-bytes]]))
 
 
 
@@ -32,11 +33,12 @@
 
 
 (defn preamble-template
-  [{:keys [bootclasspath custom-preamble] :as options}]
+  [{:keys [bootclasspath custom-preamble custom-preamble-script]}]
   (cond
+    custom-preamble-script (slurp custom-preamble-script)
     custom-preamble (str custom-preamble "\r\n")
-    bootclasspath   BOOTCLASSPATH-TEMPLATE
-    :else           NORMAL-TEMPLATE))
+    bootclasspath BOOTCLASSPATH-TEMPLATE
+    :else NORMAL-TEMPLATE))
 
 
 (defn render-preamble
@@ -59,14 +61,15 @@
 
 
 (defn options [project]
-  {:project-name    (:name project)
-   :version         (:version project)
+  {:project-name           (:name project)
+   :version                (:version project)
 
-   :main            (:main project)
-   :bootclasspath   (get-in project [:bin :bootclasspath] false)
-   :jvm-opts        (jvm-opts project)
-   :win-jvm-opts    (sanitize-jvm-opts-for-win (jvm-opts project))
-   :custom-preamble (get-in project [:bin :custom-preamble])
+   :main                   (:main project)
+   :bootclasspath          (get-in project [:bin :bootclasspath] false)
+   :jvm-opts               (jvm-opts project)
+   :win-jvm-opts           (sanitize-jvm-opts-for-win (jvm-opts project))
+   :custom-preamble        (get-in project [:bin :custom-preamble])
+   :custom-preamble-script (get-in project [:bin :custom-preamble-script])
    })
 
 
@@ -119,4 +122,6 @@
                               (str (:name project) "-" (:version project))))
           uberjar (uberjar project)]
       (writing-bin binfile uberjar (preamble opts))
+      (println "Re-aligning zip offsets")
+      (repair-zip-with-preamble-bytes binfile)
       (copy-bin project binfile))))
