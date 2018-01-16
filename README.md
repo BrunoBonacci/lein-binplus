@@ -32,14 +32,14 @@ To install it in your `profile.clj` just add the dependency like:
 ``` clojure
 {:user
  {:plugins
-  [[lein-binplus "0.6.3"]]}}
+  [[lein-binplus "0.6.4"]]}}
 ```
 
 To install it in a single project add it in your `project.clj` as follow:
 
 ``` clojure
   :profiles {:uberjar {:aot :all}
-             :dev {:plugins [[lein-binplus "0.6.3"]]}}
+             :dev {:plugins [[lein-binplus "0.6.4"]]}}
 ```
 
 Your project needs to have a `:main` field specifying the namespace
@@ -110,10 +110,23 @@ double ones.
 Unescaped: {{{jvm-opts}}}
 ```
 
+Alternatively you can specify the preamble in a file using
+`:custom-preamble-script` in your `:bin` section of your
+`project.clj`.
+
+
+        ;; specify a custom preamble
+        :bin {:name "runme"
+              :custom-preamble-script "./bin/preamble.sh"}
+
+NOTE: if both keys `:custom-preamble` and `:custom-preamble-script`
+are present the latter (`:custom-preamble-script`) takes precedence
+and `:custom-preamble` is ignored.
+
 ## License
 
 The original plugin Copyright (C) 2012 Anthony Grimes, Justin Balthrop, Jason Whitlark
 
-This enhanced version Copyright (C) 2016 Bruno Bonacci
+This enhanced version Copyright (C) 2016-2018 Bruno Bonacci
 
 Distributed under the Eclipse Public License, the same as Clojure.
