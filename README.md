@@ -123,6 +123,25 @@ NOTE: if both keys `:custom-preamble` and `:custom-preamble-script`
 are present the latter (`:custom-preamble-script`) takes precedence
 and `:custom-preamble` is ignored.
 
+## Changes from the original version
+
+This version contains a number of fixes and improvements which are not
+present in the original version.
+
+  - added ability to customize `:jvm-opts` with support for
+    environment variables.
+  - Security fix for `CVE-2012-2098` on dependency
+    (https://github.com/BrunoBonacci/lein-binplus/pull/1)
+  - Fix for Windows preamble parameter handling
+    (https://github.com/BrunoBonacci/lein-binplus/pull/6)
+  - Fix incorrect offset-rewrite on zip file
+    (https://github.com/BrunoBonacci/lein-binplus/pull/7)
+  - Add ability to fully customize and template preamble script.
+
+Although, many changes have been applied which ultimately ended up
+with a full rewrite, this version of `lein-binplus` is it a **fully
+compatible, drop-in replacement** for the original version.
+
 ## License
 
 The original plugin Copyright (C) 2012 Anthony Grimes, Justin Balthrop, Jason Whitlark
