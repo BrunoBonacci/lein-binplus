@@ -13,5 +13,5 @@
                  [de.ubercode.clostache/clostache "1.4.0"]
                  [clj-zip-meta/clj-zip-meta "0.1.3"
                   :exclusions [org.clojure/clojure]]]
-  
+
   :eval-in-leiningen true)
