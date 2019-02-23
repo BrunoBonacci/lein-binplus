@@ -11,8 +11,7 @@
 
   :dependencies [[me.raynes/fs "1.4.6"]
                  [de.ubercode.clostache/clostache "1.4.0"]
-                 [clj-zip-meta/clj-zip-meta "0.1.3" :exclusions [org.clojure/clojure]]]
-  :eval-in-leiningen true
-
-  :deploy-repositories [["releases" :clojars]
-                        ["snapshots" :clojars]])
+                 [clj-zip-meta/clj-zip-meta "0.1.3"
+                  :exclusions [org.clojure/clojure]]]
+  
+  :eval-in-leiningen true)
