@@ -66,6 +66,7 @@
 
    :main                   (:main project)
    :bootclasspath          (get-in project [:bin :bootclasspath] false)
+   :skip-realign           (get-in project [:bin :skip-realign] false)
    :jvm-opts               (jvm-opts project)
    :win-jvm-opts           (sanitize-jvm-opts-for-win (jvm-opts project))
    :custom-preamble        (get-in project [:bin :custom-preamble])
@@ -122,6 +123,7 @@
                               (str (:name project) "-" (:version project))))
           uberjar (uberjar project)]
       (writing-bin binfile uberjar (preamble opts))
-      (println "Re-aligning zip offsets")
-      (repair-zip-with-preamble-bytes binfile)
+      (when-not (:skip-realign opts)
+        (println "Re-aligning zip offsets")
+        (repair-zip-with-preamble-bytes binfile))
       (copy-bin project binfile))))

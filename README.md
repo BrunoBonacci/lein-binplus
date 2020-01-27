@@ -32,14 +32,14 @@ To install it in your `profile.clj` just add the dependency like:
 ``` clojure
 {:user
  {:plugins
-  [[lein-binplus "0.6.5"]]}}
+  [[lein-binplus "0.6.6"]]}}
 ```
 
 To install it in a single project add it in your `project.clj` as follow:
 
 ``` clojure
   :profiles {:uberjar {:aot :all}
-             :dev {:plugins [[lein-binplus "0.6.5"]]}}
+             :dev {:plugins [[lein-binplus "0.6.6"]]}}
 ```
 
 Your project needs to have a `:main` field specifying the namespace
@@ -53,18 +53,21 @@ You can also supply a `:bin` key like so:
         ;; add this in your project
         :bin {:name "runme"
               :bin-path "~/bin"
-              :bootclasspath false
               :jvm-opts ["-server" "-Dfile.encoding=utf-8" "$JVM_OPTS" ]}
 
   * `:name`: Name the file something other than `project-version`
   * `:bin-path`: If specified, also copy the file into `bin-path`,
     which is presumably on your $PATH.
-  * `:bootclasspath`: Supply the uberjar to java via
-    `-Xbootclasspath/a` instead of `-jar`.  Sometimes this can speed
-    up execution, but may not work with all classloaders.
   * `:jvm-opts`: If specified, supply the Java options to be used in
     the executable jar. When present it overrides the project's
     `:jvm-opts`. It support environment variables as well.
+  * `:bootclasspath`: Supply the uberjar to java via
+    `-Xbootclasspath/a` instead of `-jar`.  Sometimes this can speed
+    up execution, but may not work with all classloaders.
+  * `:skip-realign`: (default: `false`) Re-aligning ZIP archives
+    resets the correct offsets for the entries taking into account
+    the preamble size. Set `:skip-realign true` if you wish to skip
+    this process and not realign the entries.
 
 ## Advanced use.
 
