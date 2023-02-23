@@ -4,8 +4,8 @@
             [clostache.parser :refer [render]]
             [leiningen.uberjar :refer [uberjar]]
             [me.raynes.fs :as fs]
-            [clojure.string :as str]
-            [clj-zip-meta.core :refer [repair-zip-with-preamble-bytes]]))
+            [clojure.string :as str])
+  (:import [net.e175.klaus.zip ZipPrefixer]))
 
 
 
@@ -66,7 +66,7 @@
 
    :main                   (:main project)
    :bootclasspath          (get-in project [:bin :bootclasspath] false)
-   :skip-realign           (get-in project [:bin :skip-realign] false)
+   :skip-zip-verification  (get-in project [:bin :skip-zip-verification] false)
    :jvm-opts               (jvm-opts project)
    :win-jvm-opts           (sanitize-jvm-opts-for-win (jvm-opts project))
    :custom-preamble        (get-in project [:bin :custom-preamble])
@@ -87,16 +87,22 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(defn- write-preamble [out ^String preamble]
-  (.write out (.getBytes preamble)))
+(defn- write-preamble [^java.io.File zipfile ^String preamble]
+  (ZipPrefixer/applyPrefixesToZip
+    (.toPath zipfile)
+    (into-array [(.getBytes preamble "UTF-8")])))
 
 
-(defn writing-bin [binfile uberjar preamble]
+(defn- verify-zip-integrity [^java.io.File zipfile]
+  (ZipPrefixer/validateZipOffsets (.toPath zipfile)))
+
+
+(defn write-zip-with-preamble [binfile uberjar preamble]
   (println "Creating standalone executable:" (str binfile))
   (io/make-parents binfile)
   (with-open [bin (io/output-stream binfile)]
-    (write-preamble bin preamble)
     (io/copy (fs/file uberjar) bin))
+  (write-preamble binfile preamble)
   (fs/chmod "+x" binfile))
 
 
@@ -122,8 +128,11 @@
                            (or (get-in project [:bin :name])
                               (str (:name project) "-" (:version project))))
           uberjar (uberjar project)]
-      (writing-bin binfile uberjar (preamble opts))
-      (when-not (:skip-realign opts)
-        (println "Re-aligning zip offsets")
-        (repair-zip-with-preamble-bytes binfile))
+      ;; write bin file
+      (write-zip-with-preamble binfile uberjar (preamble opts))
+      ;; verify integrity
+      (when-not (:skip-zip-verification opts)
+        (println "Verifying zip file integrity")
+        (verify-zip-integrity binfile))
+      ;; optionally copy to bin dir
       (copy-bin project binfile))))
