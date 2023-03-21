@@ -11,6 +11,6 @@
 
   :dependencies [[me.raynes/fs "1.4.6"]
                  [de.ubercode.clostache/clostache "1.4.0"]
-                 [net.e175.klaus/zip-prefixer "0.2.0"]]
+                 [net.e175.klaus/zip-prefixer "0.3.1"]]
 
   :eval-in-leiningen true)

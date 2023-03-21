@@ -88,9 +88,9 @@
 
 
 (defn- write-preamble [^java.io.File zipfile ^String preamble]
-  (ZipPrefixer/applyPrefixesToZip
+  (ZipPrefixer/applyPrefixBytesToZip
     (.toPath zipfile)
-    (into-array [(.getBytes preamble "UTF-8")])))
+    (.getBytes preamble "UTF-8")))
 
 
 (defn- verify-zip-integrity [^java.io.File zipfile]
