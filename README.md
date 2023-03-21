@@ -32,14 +32,14 @@ To install it in your `profile.clj` just add the dependency like:
 ``` clojure
 {:user
  {:plugins
-  [[lein-binplus "0.6.7"]]}}
+  [[lein-binplus "0.6.8"]]}}
 ```
 
 To install it in a single project add it in your `project.clj` as follow:
 
 ``` clojure
   :profiles {:uberjar {:aot :all}
-             :dev {:plugins [[lein-binplus "0.6.7"]]}}
+             :dev {:plugins [[lein-binplus "0.6.8"]]}}
 ```
 
 Your project needs to have a `:main` field specifying the namespace
